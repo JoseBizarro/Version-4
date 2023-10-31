@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descripción de la Versión</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="shortcut icon" href="img/icono.ico" type="image/x-icon">
+</head>
+<body>
+    <header class="bg-dark text-light p-4">
+        <h1 class="text-center">Descripción de la Versión</h1>
+    </header>
+    <div class="container mt-4">
+        <h2 id="versionName"></h2>
+        <img id="versionImage" src="" alt="Imagen de la versión" class="img-fluid responsive-image">
+        <p id="versionDescription"></p>
+        <a href="personajes.html" class="btn custom-button mt-3">Regresar</a>
+    </div>
+    <script src="js/pouchdb-nightly.js"></script>
+    <script src="js/pouch.js"></script>
+    <script src="js/base.js"></script>
+    <script>
+        
+        // Recupera la información almacenada en localStorage
+const selectedVersion = localStorage.getItem("selectedVersion");
+const selectedCharacter = localStorage.getItem("selectedCharacter");
+const versionDescription = localStorage.getItem("versionDescription");
+
+// Muestra la información en la página
+const versionName = document.getElementById("versionName");
+const versionImage = document.getElementById("versionImage");
+const versionDescriptionElement = document.getElementById("versionDescription");
+'use strict';
+var db = new Pouch('Personajes');
+  var remoteCouch = false;
+  var cookie;
+
+  db.info(function(err, info) {
+    db.changes({since: info.update_seq, onChange: showTodos, continuous: true});
+  });
+
+  // We have to create a new todo document and enter it in the database
+  function addTodo(text) {
+    var todo = {
+      personaje: selectedCharacter,
+      version: selectedVersion,
+      author:"JoseBizarro"
+    };
+    console.log("Agregando");
+    db.post(todo, function(err, result) {
+      if (!err) {
+        console.log('Successfully posted a todo!');
+      }
+    });
+  }
+    // Show the current list of todos by reading them from the database
+    function showTodos() {
+    db.allDocs({include_docs: true}, function(err, doc) {
+      redrawTodosUI(doc.rows);
+    });
+  }
+  function sync() {
+    syncDom.setAttribute('data-sync-state', 'syncing');
+    var remote = new PouchDB(remoteCouch, {headers: {'Cookie': cookie}});
+    var pushRep = db.replicate.to(remote, {
+      continuous: true,
+      complete: syncError
+    });
+    var pullRep = db.replicate.from(remote, {
+      continuous: true,
+      complete: syncError
+    });
+  }
+if (selectedVersion && selectedCharacter && versionDescription) {
+    versionName.textContent = `Versión de ${selectedCharacter}`;
+    versionImage.src = `img/${selectedCharacter}_${selectedVersion}.png`;
+    versionDescriptionElement.textContent = versionDescription;
+
+    addTodo(versionDescription);
+} else {
+    // Si no se encuentra la información, redirige de nuevo a la página principal
+    window.location.href = "index.html";
+}
+
+    </script>
+</body>
+</html>
+
